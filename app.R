@@ -7,6 +7,7 @@
 #    http://shiny.rstudio.com/
 #
 
+if (!("epiR" %in% installed.packages())) install.packages("epiR");
 library(shiny)
 library(epiR)
 
@@ -52,7 +53,7 @@ server <- function(input, output) {
     
     Model <- reactive({
         T <- matrix(c(input$DE,input$De,input$dE,input$de),c(2,2))
-        T <- as.table(T)
+        #T <- table(T)
         colnames(T)<-rownames(T)<-c(TRUE,FALSE)
         E <- epi.2by2(T)
         F <- fisher.test(T)
@@ -60,7 +61,7 @@ server <- function(input, output) {
     })
     
     output$rr <- renderText({
-        signif(Model()$E$res$RR.strata.wald$est,3)
+        signif(Model()$E$massoc.detail$RR.strata.wald$est,3)
     })
     output$pval <- renderText({
         signif(Model()$F$p.value,2)
@@ -74,7 +75,7 @@ server <- function(input, output) {
     })
     
     output$plot <- renderPlot({
-        ci <- Model()$E$res$RR.strata.wald
+        ci <- Model()$E$massoc.detail$RR.strata.wald
         if (!is.finite(ci$lower)) return(NULL)
         if (!is.finite(ci$upper)) return(NULL)
         par(mar=c(3,3,3,0))
